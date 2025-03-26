@@ -1,22 +1,54 @@
-// Send message to content script to read DOM
-chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    const tabId = tabs[0].id;
+// This function will be executed in the context of the active tab
+function editTextAreaOnTab() {
+    // Find the first <textarea> element on the page
+    const textarea = document.querySelector('textarea');
     
-    chrome.scripting.executeScript({
-      target: { tabId },
-      function: readDOM
-    }, (results) => {
-      const domData = results[0].result;
-      document.getElementById('title').innerText = domData.title;
-      document.getElementById('h1').innerText = domData.h1;
-    });
-  });
+    // If a <textarea> is found, modify its value
+    if (textarea) {
+      textarea.value = "Hello, World!";  // Set the content of the textarea to "Hello, World!"
+      // Trigger React's onChange event
+      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    } else {
+      console.log("No textarea found on the page.");
+    }
+
+    return {textarea};
+  }
   
-  // Function to read DOM
-  function readDOM() {
-    const title = document.title;
-    const h1 = document.querySelector('h1') ? document.querySelector('h1').innerText : 'No H1 tag found';
+  // Check if the script is running in the popup context or as a content script
+  if (window.location.href.includes('chrome-extension://')) {
+    // This block runs when the script is executed in the popup context (the extension's popup UI)
     
-    return { title, h1 };
+    // Query the active tab in the current window
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const tabId = tabs[0].id;  // Get the ID of the active tab
+  
+      // Execute the editTextAreaOnTab function on the active tab
+      chrome.scripting.executeScript({
+        target: { tabId },   // We execute the script on the tab with the given tabId
+        function: editTextAreaOnTab  // The function to run in the context of the page (on the active tab)
+      }, (results) => {
+        dom_data = results[0].result;
+
+        document.getElementById('textarea').innerText = dom_data.textarea;
+
+
+      });
+    });
+  } else {
+    // This block runs when the script is executed in the content script context (inside the webpage)
+  
+    // Listen for messages sent from the popup or other parts of the extension
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      if (message.action === 'button') {  // If the message action is 'editTextArea'
+        const textarea = document.querySelector('textarea');
+        if (textarea) {
+          textarea.value = "Hello, World!";  // Modify the textarea value
+          sendResponse({ success: true });
+        } else {
+          sendResponse({ success: false, error: "No textarea found on the page" });
+        }
+      }
+    });
   }
   
