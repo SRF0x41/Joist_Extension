@@ -61,7 +61,3 @@ The Node.js backend interacts with the Gemini API to correct text. The request s
 - Support for additional text input fields.
 - Options page for user settings.
 - Enhanced error handling and logging.
-
-## License
-MIT License
-

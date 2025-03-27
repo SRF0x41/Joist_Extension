@@ -11,31 +11,34 @@ if (window.location.href.includes('chrome-extension://')) {
         chrome.scripting.executeScript({
             target: { tabId },
             func: () => {
-                const API_KEY = 'AIzaSyBGqKIFeaWPSXcM1c2XCCVnwx6jBinKPG0';
-                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+                console.log("Collecting text area data ...");
+                const textareas = document.querySelectorAll('textarea');
+                const collected_text_areas = [];
+                for (const textarea of textareas) {
+                    collected_text_areas.push(textarea.value);
+                    if (textarea) {
+                        try {
+                            chrome.runtime.sendMessage({action: 'call_gemini_api', text_line: textarea.value}, (response) => {
+                                if(response.repairedText){
+                                    console.log("Original Text: ", textarea.value);
+                                    textarea.value = response.repairedText;
+                                    console.log("Repaired text: ", response.repairedText);
 
-                const requestBody = {
-                    contents: [{
-                        parts: [{
-                            text: 'Hello'
-                        }]
-                    }]
-                };
+                                    // Use execCommand to replace text (keeps undo history)
+                                    document.execCommand("selectAll", false, null);
+                                    document.execCommand("insertText", false, response.repairedText);
 
-                fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(requestBody),
-                })
-                .then(response => response.text())  // Convert response to text
-                .then(text => {
-                    console.log('Response text:', text);  // Log the text response
-                })
-                .catch(error => {
-                    console.error('Fetch error:', error);
-                });
+                                    // Trigger React/JS event listeners
+                                    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                                    textarea.dispatchEvent(new Event('change', { bubbles: true }));
+                                }
+                            });
+                        } catch (error) {
+                            console.error('Error repairing text:', error);
+                        }
+                    }
+                }
+                console.log("Collected Text Areas:", collected_text_areas);
             }
         })
         .then(() => {
@@ -46,51 +49,3 @@ if (window.location.href.includes('chrome-extension://')) {
         });
     });
 }
-
-
-
-
-/*
-if (window.location.href.includes('chrome-extension://')) {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs.length === 0 || !tabs[0]?.id) {
-            console.error("No active tab found.");
-            return;
-        }
-
-        const tabId = tabs[0].id;  
-        console.log("Executing script on tab:", tabId);
-
-        chrome.scripting.executeScript({
-            target: { tabId },
-            func: () => {
-                // this is the isolated environment everything must be defined here
-
-                // Collect text_area data
-                console.log("Collecting text data ...");
-                const textareas = document.querySelectorAll('textarea');
-                collected_text_areas = [];
-                for(const n of textareas){
-                    collected_text_areas.push(n.value);
-
-                    if(n){
-                        n.value = "THIS IS EDITED TEXT";
-                        // Trigger react 
-                        n.dispatchEvent(new Event('input', { bubbles: true }));
-                    }
-                }
-                console.log(collected_text_areas);
-                
-                
-                
-
-
-
-            }
-        }).then(() => {
-            console.log("✅ Script executed successfully.");
-        }).catch((error) => {
-            console.error("Script execution failed:", error);
-        });
-    });
-} */
