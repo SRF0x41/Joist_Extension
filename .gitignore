@@ -36,3 +36,7 @@ Thumbs.db
 
 # Chrome-specific files
 chrome-profile/
+
+
+# Background js
+.background.js
