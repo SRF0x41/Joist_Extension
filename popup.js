@@ -7,11 +7,15 @@ if (window.location.href.includes('chrome-extension://')) {
 
         const tabId = tabs[0].id;
         console.log("Executing script on tab:", tabId);
-
         chrome.scripting.executeScript({
             target: { tabId },
             func: () => {
-                console.log("Collecting text area data ...");
+            //     fetch("http://localhost:5000/api/data")
+            //         .then(response => response.json())
+            //         .then(data => console.log("Data received:", data))
+            //         .catch(error => console.error("Error:", error));
+
+             console.log("Collecting text area data ...");
                 const textareas = document.querySelectorAll('textarea');
                 const collected_text_areas = [];
                 for (const textarea of textareas) {
