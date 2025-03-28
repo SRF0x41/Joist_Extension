@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML and CSS Together</title>
+    <title>Undo Button</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -22,16 +22,29 @@
         h1 {
             color: #333;
         }
-        p {
-            color: #666;
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>TextEd</h1>
-        <button name="b1"></button>
+        <button id="undoButton">Undo</button>
     </div>
-    <script src="popup.js"></script>
+    <script src = 'popup.js'></script>
 </body>
 </html>
